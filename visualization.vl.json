@@ -1,0 +1,211 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "url": "https://raw.githubusercontent.com/DevuRocco/IVRepo/main/GPS_ReviewSentiments.csv",
+    "format": {"type": "csv"}
+  },
+  "description": "This implementation provides an overall rating analysis of the play store apps with respect to category, content rating and sentiments. It is composed of three charts namely bar chart, histogram and scatter plot. Histogram and Scatter plot are vertically concatenated and bar plot is horizontally concatenated with the two charts. Layering has been implemented in the histogram to facilitate proper interaction with the legend and other charts.",
+  "title": {
+    "text": "Google Play Store App Rating Analysis",
+    "anchor": "middle",
+    "fontSize": 30,
+    "offset": 20
+  },
+  "hconcat": [
+    {
+      "width": 200,
+      "height": 600,
+      "params": [
+        {
+          "name": "bar_selection",
+          "select": {
+            "type": "point",
+            "fields": ["Category"],
+            "encodings": ["y"]
+          }
+        },
+        {
+          "name": "legend_selection",
+          "select": {"type": "point", "fields": ["Content Rating"]},
+          "bind": "legend"
+        }
+      ],
+      "transform": [
+        {"filter": {"param": "scatter_selection"}},
+        {"filter": {"param": "legend_selection"}},
+        {"filter": {"param": "line_selection"}}
+      ],
+      "mark": "bar",
+      "encoding": {
+        "y": {
+          "field": "Category",
+          "type": "nominal",
+          "sort": "-x",
+          "title": null
+        },
+        "x": {
+          "field": "App",
+          "title": "Application Count",
+          "aggregate": "count"
+        },
+        "color": {
+          "condition": {
+            "param": "bar_selection",
+            "field": "Content Rating",
+            "type": "nominal",
+            "scale": {
+              "domain": [
+                "Adults only 18+",
+                "Everyone",
+                "Everyone 10+",
+                "Mature 17+",
+                "Teen"
+              ],
+              "range": ["#9E9CC2", "#00C7A9", "#8101FA", "#43A2CA", "#0868AC"]
+            }
+          },
+          "value": "lightgrey"
+        },
+        "opacity": {
+          "condition": {"param": "bar_selection", "value": 1},
+          "value": 0.5
+        }
+      }
+    },
+    {
+      "vconcat": [
+        {
+          "width": 400,
+          "height": 280,
+          "mark": "circle",
+          "params": [
+            {
+              "name": "scatter_selection",
+              "select": {"type": "interval", "encodings": ["x", "y"]}
+            }
+          ],
+          "transform": [
+            {"filter": {"param": "bar_selection"}},
+            {"filter": {"param": "legend_selection"}},
+            {"filter": {"param": "line_selection"}}
+          ],
+          "encoding": {
+            "y": {"field": "Rating", "type": "quantitative"},
+            "x": {"field": "Sentiment", "type": "quantitative"},
+            "color": {
+              "condition": {
+                "param": "scatter_selection",
+                "field": "Content Rating",
+                "type": "nominal",
+                "scale": {
+                  "domain": [
+                    "Adults only 18+",
+                    "Everyone",
+                    "Everyone 10+",
+                    "Mature 17+",
+                    "Teen"
+                  ],
+                  "range": [
+                    "#9E9CC2",
+                    "#00C7A9",
+                    "#8101FA",
+                    "#43A2CA",
+                    "#0868AC"
+                  ]
+                }
+              },
+              "value": "lightgrey"
+            },
+            "tooltip": {"field": "App", "type": "nominal"}
+          }
+        },
+        {
+          "width": 400,
+          "height": 240,
+          "layer": [
+            {
+              "transform": [
+                {"filter": {"param": "bar_selection"}},
+                {"filter": {"param": "legend_selection"}},
+                {"filter": {"param": "scatter_selection"}}
+              ],
+              "params": [
+                {
+                  "name": "line_selection",
+                  "select": {
+                    "type": "interval",
+                    "encodings": ["x"],
+                    "resolve": "global"
+                  }
+                }
+              ],
+              "mark": {"type": "bar", "clip": true, "tooltip": true},
+              "encoding": {
+                "x": {
+                  "bin": {"base": 20, "nice": true, "maxbins": 40},
+                  "field": "Rating",
+                  "type": "quantitative",
+                  "title": "Rating"
+                },
+                "y": {
+                  "field": "*",
+                  "type": "quantitative",
+                  "aggregate": "count",
+                  "title": "Application Count"
+                },
+                "color": {"value": "lightgray"}
+              }
+            },
+            {
+              "transform": [
+                {"filter": {"param": "line_selection"}},
+                {"filter": {"param": "bar_selection"}},
+                {"filter": {"param": "legend_selection"}},
+                {"filter": {"param": "scatter_selection"}}
+              ],
+              "mark": {"type": "bar", "clip": true, "tooltip": true},
+              "encoding": {
+                "x": {
+                  "bin": {"base": 20, "nice": true, "maxbins": 40},
+                  "field": "Rating",
+                  "type": "quantitative",
+                  "title": "Rating"
+                },
+                "y": {
+                  "field": "*",
+                  "type": "quantitative",
+                  "aggregate": "count",
+                  "title": "Application Count"
+                },
+                "color": {
+                  "field": "Content Rating",
+                  "type": "nominal",
+                  "scale": {
+                    "domain": [
+                      "Adults only 18+",
+                      "Everyone",
+                      "Everyone 10+",
+                      "Mature 17+",
+                      "Teen"
+                    ],
+                    "range": [
+                      "#9E9CC2",
+                      "#00C7A9",
+                      "#8101FA",
+                      "#43A2CA",
+                      "#0868AC"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "config": {
+    "legend": {"orient": "top", "titleFontSize": 15, "labelFontSize": 14},
+    "axis": {"titleFontSize": 16, "titlePadding": 10, "labelFontSize": 12}
+  }
+}
